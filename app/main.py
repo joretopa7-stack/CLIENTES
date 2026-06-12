@@ -1,14 +1,14 @@
 from fastapi import FastAPI, HTTPException, status
-from modelos.clientes import Cliente, ClienteCrear, ClienteEditar
-from modelos.facturas import Factura, FacturaCrear, FacturaEditar
-from modelos.transacciones import Transaccion,TransaccionCrear, TransaccionEditar
+from app.modelos.clientes import Cliente, ClienteCrear, ClienteEditar
+from app.modelos.facturas import Factura, FacturaCrear, FacturaEditar
+from app.modelos.transacciones import Transaccion,TransaccionCrear, TransaccionEditar
 
 
 app = FastAPI()
 
 ListaClientes: list[Cliente] = []
 ListaFacturas: list[Factura] = []
-ListaTrasacciones: list[Transaccion] = []
+ListaTransacciones: list[Transaccion] = []
 #endpoint, para obtener o listar todos los clientes
 
 @app.get("/clientes", response_model=list[Cliente])
@@ -125,7 +125,7 @@ async def EliminarFactura(factura_id: int):
 
 @app.get("/transacciones", response_model=list[Transaccion])
 async def ListarTransacciones():
-    return ListaTrasacciones
+    return ListaTransacciones
 
 @app.get("/transacciones/{transaccion_id}", response_model=Transaccion)
 async def ListarTransaccion(transaccion_id: int):
@@ -150,9 +150,11 @@ async def CrearTransaccion(factura_id: int, datos_transaccion: TransaccionCrear)
     factura_encontrada.transacciones.append(transaccion_validada)
     
     #id de la trasaccion
-    transaccion_validada.id = len(ListaTrasacciones) + 1
+    transaccion_validada.id = len(ListaTransacciones) + 1
     return transaccion_validada
-
+    # falto agregar a la lista de transacciones
+    ListaTransacciones.append(transaccion_validada)
+    return transaccion_validada
 
 
 
