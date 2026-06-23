@@ -50,12 +50,18 @@ async def CrearFactura(cliente_id: int, datos_factura: FacturaCrear):
 
 @rutas_facturas.patch("/facturas/{factura_id}", response_model=Factura)
 async def EditarFactura(factura_id: int, datos_factura: Factura):
-    pass
+    for i, factura in enumerate(ListaFacturas):
+        if factura.id == factura_id:
+            ListaFacturas[i] = datos_factura
+            return datos_factura
+
+    raise HTTPException(status_code=400, detail=f"La factura con id {factura_id} no existe")
 
 @rutas_facturas.delete("/facturas/{factura_id}", response_model=Factura)
 async def EliminarFactura(factura_id: int):
-    pass
+    for i, factura in enumerate(ListaFacturas):
+        if factura.id == factura_id:
+            ListaFacturas.pop(i)
+            return factura
 
-
-
-
+    raise HTTPException(status_code=400, detail=f"La factura con id {factura_id} no existe")
