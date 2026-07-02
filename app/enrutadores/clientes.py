@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from app.modelos.clientes import Cliente, ClienteCrear, ClienteEditar
 from app.listas import ListaClientes
+from app.conexion_bd import Sesion_dependencia
 
 rutas_clientes = APIRouter()
 
@@ -12,8 +13,8 @@ async def ListarClientes():
 
 #endpoint, para obtener o listar un solo cliente de la lista
 
-@rutas_clientes.get("/clientes/{cliente_id}", response_model=Cliente)
-async def ListarCliente(cliente_id: int):
+@rutas_clientes.get("/clientes/{cliente_id}", response_model=Cliente,)
+async def ListarCliente(cliente_id: int, mi_session: Sesion_dependencia):
     #recorrer la lista clientes
     for cliente in enumerate(ListaClientes):
         if cliente[1].id == cliente_id:
@@ -23,28 +24,26 @@ async def ListarCliente(cliente_id: int):
 
 #endpoint, para crear un cliente, y agregar a la lista
 
-@rutas_clientes.post("/clientes", response_model=Cliente)
-async def AgregarCliente(datos_cliente: ClienteCrear):
+@rutas_clientes.post("/clientes", response_model=Cliente, )
+async def AgregarCliente(datos_cliente: ClienteCrear, mi_session: Sesion_dependencia):
 
     ClienteValidado = Cliente.model_validate(datos_cliente.model_dump())
-    
-    #generar id
-    id_cliente = len(ListaClientes) + 1
-    ClienteValidado.id = id_cliente
-    ListaClientes.append(ClienteValidado)
-
+    mi_session.add(ClienteValidado)
+    mi_session.commit()
+    mi_session.refresh(ClienteValidado)
     return ClienteValidado
 
 
 #endpoint, para editar un cliente, y agregar a la lista
 
 @rutas_clientes.patch("/clientes/{cliente_id}", response_model=Cliente)
-async def EditarCliente(cliente_id: int, datos_cliente: ClienteEditar):
+async def EditarCliente(cliente_id: int, datos_cliente: ClienteEditar, mi_session: Sesion_dependencia):
     for i, cliente in enumerate(ListaClientes):
         if cliente.id == cliente_id:
             #validar los datos del cliente
             ClienteValidado = Cliente.model_validate(datos_cliente.model_dump())
             ClienteValidado.id = cliente_id
+            
             ListaClientes[i] = ClienteValidado
             return ClienteValidado
 
